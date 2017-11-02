@@ -16,9 +16,6 @@ defmodule TimeGif.Super do
 
     {:ok, _} = start_cowboy()
 
-    :ets.new(:table, [:public, :named_table])
-    :ets.insert(:table, {:clients, []})
-
     supervise(children, strategy: :one_for_one)
   end
 

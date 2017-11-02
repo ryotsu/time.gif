@@ -27,15 +27,10 @@ defmodule TimeGif.Producer do
 
     frame = get_next_frame()
 
-    [clients: clients] = :ets.lookup(:table, :clients)
-    for client <- clients do
-      Process.monitor(client)
-    end
-
     Process.send_after(self(), :next_frame, 1000)
     Process.send_after(self(), :send_frame, 1000)
 
-    {:ok, %{base: base, frame: frame, clients: clients}}
+    {:ok, %{base: base, frame: frame, clients: []}}
   end
 
   def handle_call(:subscribe, {pid, _tag}, %{clients: clients} = state) do
@@ -67,11 +62,6 @@ defmodule TimeGif.Producer do
     clients = List.delete(state.clients, pid)
 
     {:noreply, %{state | clients: clients}}
-  end
-
-  def terminate(_reason, %{clients: clients}) do
-    :ets.insert(:table, {:clients, clients})
-    :ok
   end
 
   @spec get_next_frame :: binary
