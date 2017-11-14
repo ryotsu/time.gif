@@ -21,12 +21,13 @@ defmodule TimeGif.Super do
 
   defp start_cowboy() do
     dispatch = :cowboy_router.compile([
-      _: [{"/", TimeGif.Handler, []}]
+      _: [{"/time.gif", TimeGif.Handler, []}]
     ])
 
     :cowboy.start_clear(:my_http_listener,
       [port: 8080],
-      %{env: %{dispatch: dispatch}}
+      %{env: %{dispatch: dispatch},
+        idle_timeout: 24 * 60 * 60 * 1000}
     )
   end
 end

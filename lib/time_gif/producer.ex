@@ -58,7 +58,7 @@ defmodule TimeGif.Producer do
     {:noreply, state}
   end
 
-  def handle_info({:DOWN, _ref, :process, pid, _reson}, state) do
+  def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
     clients = List.delete(state.clients, pid)
 
     {:noreply, %{state | clients: clients}}
