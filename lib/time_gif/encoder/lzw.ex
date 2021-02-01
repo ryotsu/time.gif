@@ -22,11 +22,12 @@ defmodule TimeGif.Encoder.LZW do
     # Send a clear code at the start of the code stream
     init_code = [{table.clear, min_code + 1}]
 
-    codes = indices
-    |> encode(init_code, table, [buffer], next, code_width)
-    |> Enum.reduce(<<>>, fn {code, width}, acc ->
-         <<code :: size(width), acc :: bitstring>>
-       end)
+    codes =
+      indices
+      |> encode(init_code, table, [buffer], next, code_width)
+      |> Enum.reduce(<<>>, fn {code, width}, acc ->
+        <<code::size(width), acc::bitstring>>
+      end)
 
     # Pad the codestream and reverse it
     codes =
@@ -35,10 +36,7 @@ defmodule TimeGif.Encoder.LZW do
       |> :binary.decode_unsigned(:little)
       |> :binary.encode_unsigned(:big)
 
-    <<min_code,
-      chunkify(codes) :: bitstring,
-      0,
-    >>
+    <<min_code, chunkify(codes)::bitstring, 0>>
   end
 
   def compress(_, _), do: :error
@@ -70,6 +68,7 @@ defmodule TimeGif.Encoder.LZW do
         new_code = Map.fetch!(table, buf)
         codes = [{new_code, width} | codes]
         next = next + 1
+
         width =
           if :math.pow(2, width) < next do
             width + 1
@@ -84,7 +83,7 @@ defmodule TimeGif.Encoder.LZW do
   defp encode([], codes, table, buf, _next, width) do
     new_code = Map.fetch!(table, buf)
     codes = [{table.end, width}, {new_code, width} | codes]
-    codes |> Enum.reverse
+    codes |> Enum.reverse()
   end
 
   @spec init_table(integer) :: {map, integer}
@@ -96,13 +95,14 @@ defmodule TimeGif.Encoder.LZW do
     # Initialize colour table
     # Fill colour indices as keys and values
     # and Add code for clear and end
-    table = 0..colour_count
-    |> Enum.reduce(%{}, fn(x, acc) ->
-         Map.put(acc, [x], x)
-       end)
-    |> Map.put(:clear, colour_count + 1)
-    |> Map.put(:end, colour_count + 2)
-    |> Map.put(:min_code, min_code)
+    table =
+      0..colour_count
+      |> Enum.reduce(%{}, fn x, acc ->
+        Map.put(acc, [x], x)
+      end)
+      |> Map.put(:clear, colour_count + 1)
+      |> Map.put(:end, colour_count + 2)
+      |> Map.put(:min_code, min_code)
 
     # Return the table and the index where next code starts
     {table, colour_count + 3}
@@ -111,9 +111,10 @@ defmodule TimeGif.Encoder.LZW do
   @spec pad_bits(binary) :: binary
   defp pad_bits(block) do
     null_bits = 8 - rem(bit_size(block), 8)
+
     case null_bits == 8 do
       true -> block
-      false -> <<0 :: size(null_bits), block :: bitstring>>
+      false -> <<0::size(null_bits), block::bitstring>>
     end
   end
 
@@ -121,11 +122,11 @@ defmodule TimeGif.Encoder.LZW do
   @spec chunkify(binary, binary) :: binary
   defp chunkify(data, combined \\ "")
 
-  defp chunkify(<<data :: bytes-size(255), rest :: bitstring>>, combined) do
-    chunkify(rest, combined <> <<255, data :: bitstring>>)
+  defp chunkify(<<data::bytes-size(255), rest::bitstring>>, combined) do
+    chunkify(rest, combined <> <<255, data::bitstring>>)
   end
 
   defp chunkify(data, combined) do
-    combined <> <<byte_size(data), data :: bitstring>>
+    combined <> <<byte_size(data), data::bitstring>>
   end
 end

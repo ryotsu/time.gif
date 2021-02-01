@@ -5,8 +5,8 @@ defmodule TimeGif.Mixfile do
     [
       app: :time_gif,
       version: "0.1.0",
-      elixir: "~> 1.5",
-      start_permanent: Mix.env == :prod,
+      elixir: "~> 1.11",
+      start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
   end
@@ -16,15 +16,16 @@ defmodule TimeGif.Mixfile do
     [
       mod: {TimeGif, []},
       applications: [:cowboy, :ranch],
-      extra_applications: [:logger],
+      extra_applications: [:logger]
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
-      {:cowboy, "~> 2.0"},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:cowboy, "~> 2.8"}
     ]
   end
 end

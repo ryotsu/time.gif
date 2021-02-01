@@ -7,14 +7,17 @@ defmodule TimeGif.Handler do
 
   @spec init(map, list) :: {:cowboy_loop, map, list}
   def init(req, state) do
-    req = :cowboy_req.stream_reply(200,
-      %{"content-type" => "image/gif",
-        "connection" => "keep-alive",
-        "content-transfer-encoding" => "binary",
-        "expires" => "0"
-      },
-      req
-    )
+    req =
+      :cowboy_req.stream_reply(
+        200,
+        %{
+          "content-type" => "image/gif",
+          "connection" => "keep-alive",
+          "content-transfer-encoding" => "binary",
+          "expires" => "0"
+        },
+        req
+      )
 
     data = Producer.subscribe()
     :cowboy_req.stream_body(data, :nofin, req)

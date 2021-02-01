@@ -11,23 +11,21 @@ defmodule TimeGif.Super do
 
   def init(:ok) do
     children = [
-      worker(TimeGif.Producer, [], restart: :permanent)
+      {TimeGif.Producer, :ok}
     ]
 
     {:ok, _} = start_cowboy()
 
-    supervise(children, strategy: :one_for_one)
+    Supervisor.init(children, strategy: :one_for_one)
   end
 
   defp start_cowboy() do
-    dispatch = :cowboy_router.compile([
-      _: [{"/time.gif", TimeGif.Handler, []}]
-    ])
+    dispatch = :cowboy_router.compile(_: [{"/time.gif", TimeGif.Handler, []}])
 
-    :cowboy.start_clear(:my_http_listener,
+    :cowboy.start_clear(
+      :my_http_listener,
       [port: 8080],
-      %{env: %{dispatch: dispatch},
-        idle_timeout: 24 * 60 * 60 * 1000}
+      %{env: %{dispatch: dispatch}, idle_timeout: 24 * 60 * 60 * 1000}
     )
   end
 end

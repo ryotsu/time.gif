@@ -5,13 +5,13 @@ defmodule TimeGif.Producer do
   Produces the image to be sent
   """
 
-  use GenServer
+  use GenServer, restart: :permanent
 
   alias TimeGif.Encoder.GIF
   alias TimeGif.Encoder.LZW
   alias TimeGif.Digits
 
-  def start_link do
+  def start_link(:ok) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
@@ -20,10 +20,11 @@ defmodule TimeGif.Producer do
   end
 
   def init(:ok) do
-    base = "GIF89a"
-    <> GIF.screen_descriptor(132, 28, 0)
-    <> GIF.color_table()
-    <> GIF.application_extension(0)
+    base =
+      "GIF89a" <>
+        GIF.screen_descriptor(132, 28, 0) <>
+        GIF.color_table() <>
+        GIF.application_extension(0)
 
     frame = get_next_frame()
 
@@ -66,17 +67,17 @@ defmodule TimeGif.Producer do
 
   @spec get_next_frame :: binary
   defp get_next_frame do
-    GIF.graphic_control_ext(1, 100)
-    <> GIF.image_descriptor(132, 28)
-    <> get_frame_data()
+    GIF.graphic_control_ext(1, 100) <>
+      GIF.image_descriptor(132, 28) <>
+      get_frame_data()
   end
 
   @spec get_frame_data :: binary
   defp get_frame_data do
-    Time.utc_now
-    |> Time.to_string
+    Time.utc_now()
+    |> Time.to_string()
     |> String.split(".")
-    |> Digits.get_image_data
+    |> Digits.get_image_data()
     |> LZW.compress(2)
   end
 end
