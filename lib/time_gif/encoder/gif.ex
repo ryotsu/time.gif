@@ -40,16 +40,16 @@ defmodule TimeGif.Encoder.GIF do
 
   @spec image_descriptor(integer, integer, integer, integer) :: binary
   def image_descriptor(left \\ 0, top \\ 0, width, height) do
-    <<0x2C, # Image seperator
+    <<0x2C,               # Image seperator
       left :: little-16,
       top :: little-16,
       width :: little-16,
       height :: little-16,
-      0 :: 1, # Local colour table flag
-      0 :: 1, # Interlace flag
-      0 :: 1, # Sort flag
-      0 :: 2, # Reserved for future use
-      0 :: 3, # Size of local colour table
+      0 :: 1,             # Local colour table flag
+      0 :: 1,             # Interlace flag
+      0 :: 1,             # Sort flag
+      0 :: 2,             # Reserved for future use
+      0 :: 3,             # Size of local colour table
     >>
   end
 
