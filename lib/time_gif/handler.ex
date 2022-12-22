@@ -11,10 +11,11 @@ defmodule TimeGif.Handler do
       :cowboy_req.stream_reply(
         200,
         %{
-          "content-type" => "image/gif",
+          "Content-Type" => "image/gif",
           "connection" => "keep-alive",
           "content-transfer-encoding" => "binary",
-          "expires" => "0"
+          "expires" => "0",
+          "Cache-Control" => "no-cache, no-store, no-transform"
         },
         req
       )

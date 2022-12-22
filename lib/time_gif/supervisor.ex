@@ -1,17 +1,18 @@
-defmodule TimeGif.Super do
+defmodule TimeGif.Supervisor do
   @moduledoc """
   Supervisor for producer
   """
 
   use Supervisor
 
-  def start_link do
-    Supervisor.start_link(__MODULE__, :ok, name: __MODULE__)
+  def start_link(opts) do
+    Supervisor.start_link(__MODULE__, :ok, opts)
   end
 
+  @impl true
   def init(:ok) do
     children = [
-      {TimeGif.Producer, :ok}
+      {TimeGif.Producer, name: TimeGif.Producer}
     ]
 
     {:ok, _} = start_cowboy()

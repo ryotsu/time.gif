@@ -1,9 +1,12 @@
 defmodule TimeGif do
+  use Application
+
   @moduledoc """
-  Documentation for TimeGif.
+  Starts the `TimeGif` application
   """
 
+  @impl true
   def start(_type, _args) do
-    TimeGif.Super.start_link()
+    TimeGif.Supervisor.start_link(name: TimeGif.Supervisor)
   end
 end

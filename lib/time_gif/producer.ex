@@ -11,14 +11,16 @@ defmodule TimeGif.Producer do
   alias TimeGif.Encoder.LZW
   alias TimeGif.Digits
 
-  def start_link(:ok) do
-    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
+  def start_link(opts) do
+    GenServer.start_link(__MODULE__, :ok, opts)
   end
 
+  @spec subscribe :: binary
   def subscribe do
     GenServer.call(__MODULE__, :subscribe)
   end
 
+  @impl true
   def init(:ok) do
     base =
       "GIF89a" <>
@@ -34,6 +36,7 @@ defmodule TimeGif.Producer do
     {:ok, %{base: base, frame: frame, clients: []}}
   end
 
+  @impl true
   def handle_call(:subscribe, {pid, _tag}, %{clients: clients} = state) do
     clients = [pid | clients]
     Process.monitor(pid)
@@ -41,6 +44,7 @@ defmodule TimeGif.Producer do
     {:reply, state.base <> state.frame, %{state | clients: clients}}
   end
 
+  @impl true
   def handle_info(:next_frame, state) do
     Process.send_after(self(), :next_frame, 1000)
 
@@ -49,6 +53,7 @@ defmodule TimeGif.Producer do
     {:noreply, %{state | frame: frame}}
   end
 
+  @impl true
   def handle_info(:send_frame, %{clients: clients} = state) do
     Process.send_after(self(), :send_frame, 1000)
 
@@ -59,6 +64,7 @@ defmodule TimeGif.Producer do
     {:noreply, state}
   end
 
+  @impl true
   def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
     clients = List.delete(state.clients, pid)
 
