@@ -12,7 +12,8 @@ defmodule TimeGif.Supervisor do
   @impl true
   def init(:ok) do
     children = [
-      {TimeGif.Producer, name: TimeGif.Producer}
+      {TimeGif.Manager, :ok},
+      {DynamicSupervisor, strategy: :one_for_one, name: TimeSupervisor}
     ]
 
     {:ok, _} = start_cowboy()

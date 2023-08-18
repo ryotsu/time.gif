@@ -4,7 +4,7 @@ defmodule TimeGif.Mixfile do
   def project do
     [
       app: :time_gif,
-      version: "1.0.0",
+      version: "1.1.0",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
       deps: deps()
@@ -15,7 +15,7 @@ defmodule TimeGif.Mixfile do
   def application do
     [
       mod: {TimeGif, []},
-      applications: [:cowboy, :ranch],
+      applications: [:cowboy, :ranch, :httpoison, :jason],
       extra_applications: [:logger]
     ]
   end
@@ -25,7 +25,9 @@ defmodule TimeGif.Mixfile do
     [
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:cowboy, "~> 2.8"}
+      {:cowboy, "~> 2.8"},
+      {:jason, "~> 1.4"},
+      {:httpoison, "~> 2.0"}
     ]
   end
 end

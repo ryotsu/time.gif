@@ -10,34 +10,37 @@ defmodule TimeGif.Producer do
   alias TimeGif.Encoder.GIF
   alias TimeGif.Encoder.LZW
   alias TimeGif.Digits
+  alias TimeGif.Manager
 
-  def start_link(opts) do
-    GenServer.start_link(__MODULE__, :ok, opts)
+  def start_link(offset) do
+    GenServer.start_link(__MODULE__, offset)
   end
 
-  @spec subscribe :: binary
-  def subscribe do
-    GenServer.call(__MODULE__, :subscribe)
+  @spec subscribe(pid, pid) :: binary
+  def subscribe(producer, pid) do
+    GenServer.call(producer, {:subscribe, pid})
   end
 
   @impl true
-  def init(:ok) do
+  def init(offset) do
     base =
       "GIF89a" <>
         GIF.screen_descriptor(132, 28, 0) <>
         GIF.color_table() <>
         GIF.application_extension(0)
 
-    frame = get_next_frame()
+    frame = get_next_frame(offset)
 
     Process.send_after(self(), :next_frame, 1000)
     Process.send_after(self(), :send_frame, 1000)
 
-    {:ok, %{base: base, frame: frame, clients: []}}
+    Process.send(Manager, {:producer, offset, self()}, [])
+
+    {:ok, %{base: base, frame: frame, clients: [], offset: offset}}
   end
 
   @impl true
-  def handle_call(:subscribe, {pid, _tag}, %{clients: clients} = state) do
+  def handle_call({:subscribe, pid}, _from, %{clients: clients} = state) do
     clients = [pid | clients]
     Process.monitor(pid)
 
@@ -45,10 +48,10 @@ defmodule TimeGif.Producer do
   end
 
   @impl true
-  def handle_info(:next_frame, state) do
+  def handle_info(:next_frame, %{offset: offset} = state) do
     Process.send_after(self(), :next_frame, 1000)
 
-    frame = get_next_frame()
+    frame = get_next_frame(offset)
 
     {:noreply, %{state | frame: frame}}
   end
@@ -71,16 +74,17 @@ defmodule TimeGif.Producer do
     {:noreply, %{state | clients: clients}}
   end
 
-  @spec get_next_frame :: binary
-  defp get_next_frame do
+  @spec get_next_frame(integer) :: binary
+  defp get_next_frame(offset) do
     GIF.graphic_control_ext(1, 100) <>
       GIF.image_descriptor(132, 28) <>
-      get_frame_data()
+      get_frame_data(offset)
   end
 
-  @spec get_frame_data :: binary
-  defp get_frame_data do
+  @spec get_frame_data(integer) :: binary
+  defp get_frame_data(offset) do
     Time.utc_now()
+    |> Time.add(offset)
     |> Time.to_string()
     |> String.split(".")
     |> Digits.get_image_data()

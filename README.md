@@ -1,6 +1,6 @@
 # time.gif
 
-A GIF that shows the current time in UTC
+A GIF that shows the local time based on the IP address.
 
 ![Time](https://gif.kochika.me/time.gif)
 
